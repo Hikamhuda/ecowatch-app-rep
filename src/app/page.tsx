@@ -78,7 +78,7 @@ export default function Home() {
                 <img src={report.imageUrl} alt={report.title} className="report-image" />
               ) : (
                 <div className="report-image-placeholder">
-                  <span>Tidak ada foto</span>
+                  <span>Tidak ada foto terlapor</span>
                 </div>
               )}
               
