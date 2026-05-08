@@ -8,8 +8,8 @@ on:
 env:
   AWS_REGION: ap-southeast-2                   # Region AWS Anda
   ECR_REPOSITORY: ecowatch/ecowatch-app               # Nama repository ECR Anda (Harus dibuat dulu di AWS)
-  ECS_CLUSTER: amazing-butterfly-c8shcr              # Nama ECS Cluster Anda (Harus dibuat dulu di AWS)
-  ECS_SERVICE: fullstack-develop-service            # Nama ECS Service Anda (Harus dibuat dulu di AWS)
+  ECS_CLUSTER: cluster-ecowatch          # Nama ECS Cluster Anda (Harus dibuat dulu di AWS)
+  ECS_SERVICE: fullstack-dev-service             # Nama ECS Service Anda (Harus dibuat dulu di AWS)
 
 jobs:
   deploy:
