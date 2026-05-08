@@ -1,0 +1,51 @@
+name: Deploy to Amazon ECS
+
+on:
+  push:
+    branches:
+      - main # Workflow berjalan saat ada push ke branch main
+
+env:
+  AWS_REGION: ap-southeast-2                   # Region AWS Anda
+  ECR_REPOSITORY: ecowatch/ecowatch-app               # Nama repository ECR Anda (Harus dibuat dulu di AWS)
+  ECS_CLUSTER: amazing-butterfly-c8shcr               # Nama ECS Cluster Anda (Harus dibuat dulu di AWS)
+  ECS_SERVICE: fullstack-develop:1               # Nama ECS Service Anda (Harus dibuat dulu di AWS)
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build, tag, and push image to Amazon ECR
+      id: build-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: latest
+      run: |
+        # Build image Docker menggunakan Dockerfile di repo
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        
+        # Push image ke ECR
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+    - name: Force ECS to deploy new image
+      run: |
+        # Memaksa ECS menarik image 'latest' terbaru yang barusan di-push
+        aws ecs update-service --cluster ${{ env.ECS_CLUSTER }} --service ${{ env.ECS_SERVICE }} --force-new-deployment
